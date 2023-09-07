@@ -11,7 +11,7 @@ import java.io.OutputStream;
 /**
  * @author 30415
  */
-public class GIFEncoder {
+public class GifEncoder {
 
     protected int width;
     protected int height;
