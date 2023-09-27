@@ -38,13 +38,19 @@ Gradle
 
 ```code
 	dependencies {
-	        implementation 'com.github.YangDai2003:GifEncoderLib:1.0.0'
+	    implementation 'com.github.YangDai2003:GifEncoderLib:latest_version'
 	}
 ```
 
 Maven
 
-
+```code
+	<dependency>
+	    <groupId>com.github.YangDai2003</groupId>
+	    <artifactId>GifEncoderLib</artifactId>
+	    <version>Tag</version>
+	</dependency>
+```
 
 ## How to use?
 
