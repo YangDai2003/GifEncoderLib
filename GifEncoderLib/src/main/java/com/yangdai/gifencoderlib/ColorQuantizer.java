@@ -454,9 +454,9 @@ public class ColorQuantizer {
      */
     protected int findBiasedColor(int b, int g, int r) {
 
-        /* 找到最接近的神经元（最小距离）并更新频率 */
-        /* 找到最佳神经元（最小距离-偏差）并返回位置 */
-        /* 对于频繁选择的神经元，freq[i]较高，bias[i]为负 */
+        // 找到最接近的神经元（最小距离）并更新频率
+        // 找到最佳神经元（最小距离-偏差）并返回位置
+        // 对于频繁选择的神经元，freq[i]较高，bias[i]为负
 
         int i, dist, a, biasDist, betaFreq;
         int bestPos, bestBiasPos, bestDist, bestBiasDist;

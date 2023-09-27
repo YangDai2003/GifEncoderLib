@@ -57,22 +57,22 @@ Maven
 JAVA
 
 ```code
-private void convertVideoToGif(String inputVideoPath, String outputGifPath) {
-        new Thread(() -> {
-            BitmapRetriever extractor = new BitmapRetriever();
-            extractor.setFPS(10);
-            List<Bitmap> bitmaps = extractor.generateBitmaps(inputVideoPath);
+    private void convertVideoToGif(String inputVideoPath, String outputGifPath) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            BitmapRetriever extractor = new BitmapRetriever(inputVideoPath);
+            extractor.setFps(10);
+            extractor.setOutputBitmapSize(extractor.getVideoWidth() / 2, extractor.getVideoHeight() / 2);
+            List<Bitmap> bitmaps = extractor.generateBitmaps();
 
-            GIFEncoder encoder = new GIFEncoder();
+            GifEncoder encoder = new GifEncoder();
             encoder.init(bitmaps.get(0));
             encoder.start(outputGifPath);
             for (int i = 1; i < bitmaps.size(); i++) {
                 encoder.addFrame(bitmaps.get(i));
             }
             encoder.finish();
-            runOnUiThread(() -> {
-                Toast.makeText(this, "finish", Toast.LENGTH_SHORT).show();
-            });
-        }).start();
-}
+            runOnUiThread(() -> Toast.makeText(this, "finish", Toast.LENGTH_SHORT).show());
+        });
+    }
 ```

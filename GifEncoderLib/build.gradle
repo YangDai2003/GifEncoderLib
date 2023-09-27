@@ -12,8 +12,8 @@ android {
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        versionCode 102
-        versionName '1.0.2'
+        versionCode 103
+        versionName '1.0.3'
     }
 
     buildTypes {
@@ -42,7 +42,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'com.github.YangDai2003'
                 artifactId = 'GifEncoder'
-                version = '1.0.2'
+                version = '1.0.3'
             }
         }
     }

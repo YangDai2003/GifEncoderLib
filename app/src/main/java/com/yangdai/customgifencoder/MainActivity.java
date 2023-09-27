@@ -10,6 +10,8 @@ import com.yangdai.gifencoderlib.BitmapRetriever;
 import com.yangdai.gifencoderlib.GifEncoder;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -20,10 +22,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void convertVideoToGif(String inputVideoPath, String outputGifPath) {
-        new Thread(() -> {
-            BitmapRetriever extractor = new BitmapRetriever();
-            extractor.setFPS(10);
-            List<Bitmap> bitmaps = extractor.generateBitmaps(inputVideoPath);
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            BitmapRetriever extractor = new BitmapRetriever(inputVideoPath);
+            extractor.setFps(10);
+            extractor.setOutputBitmapSize(extractor.getVideoWidth() / 2, extractor.getVideoHeight() / 2);
+            List<Bitmap> bitmaps = extractor.generateBitmaps();
 
             GifEncoder encoder = new GifEncoder();
             encoder.init(bitmaps.get(0));
@@ -33,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
             }
             encoder.finish();
             runOnUiThread(() -> Toast.makeText(this, "finish", Toast.LENGTH_SHORT).show());
-        }).start();
-
+        });
     }
 }
