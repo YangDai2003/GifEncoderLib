@@ -1,6 +1,6 @@
 # GifEncoder
 
-GifEncoder 基于 MediaMetadataRetriever，使用串表压缩算法，实现视频、多张图片转GIF
+GifEncoder 基于 MediaMetadataRetriever，使用串表压缩算法，实现视频、多张图片转GIF。
 
 [![jitpack](https://jitpack.io/v/YangDai2003/GifEncoderLib.svg)](https://jitpack.io/#YangDai2003/GifEncoderLib)
 

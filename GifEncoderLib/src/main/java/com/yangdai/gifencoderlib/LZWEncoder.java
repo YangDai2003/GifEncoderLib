@@ -9,25 +9,44 @@ import java.io.OutputStream;
  * LZW有三个重要对象：数据流（CharStream）、编码流（String Table）和编译表（String Table）。
  * （1）编码时，数据流是输入对象 （数据序列），编码流就是输出对象（经过压缩运算的编码数据）；
  * （2）解码时，编码流是输入对象，数据流是输出对象；而编译表是在编码和解码时都需要借助的对象。
+ *
  * @author 30415
  */
 public class LZWEncoder {
 
     private static final int EOF = -1;
     private static final int BITS = 12;
-    private static final int HSIZE = 5003; // 80% 占用率
+    /**
+     * 80% 占用率
+     */
+    private static final int HSIZE = 5003;
 
     private final int imageWidth;
     private final int imageHeight;
     private final int initCodeSize;
     private int remainingPixels;
     private int currentPixel;
-    private int numBits; // 编码位数
-    private final int maxBits = BITS; // 用户可设置的最大位数
-    private int maxCode; // 最大编码，根据 n_bits 计算得到
-    private final int maxMaxCode = 1 << BITS; // 永远不该生成
-    private final int hashSize = HSIZE; // 动态表大小
-    private int freeCode = 0; // 第一个未使用的编码
+    /**
+     * 编码位数
+     */
+    private int numBits;
+    /**
+     * 用户可设置的最大位数
+     */
+    private final int maxBits = BITS;
+    /**
+     * 最大编码，根据 n_bits 计算得到
+     */
+    private int maxCode;
+    private final int maxMaxCode = 1 << BITS;
+    /**
+     * 动态表大小
+     */
+    private final int hashSize = HSIZE;
+    /**
+     * 第一个未使用的编码
+     */
+    private int freeCode = 0;
     private int initialNumBits;
     private int clearCode;
     private int endOfFileCode;
@@ -73,12 +92,15 @@ public class LZWEncoder {
      */
     void appendToAccumulator(byte c, OutputStream outs) throws IOException {
         accumulator[accumulatorCount++] = c;
-        if (accumulatorCount >= 254) {
-            flushAccumulator(outs);
+        if (accumulatorCount < 254) {
+            return;
         }
+        flushAccumulator(outs);
     }
 
-    // 用于块压缩的表清除
+    /**
+     * 用于块压缩的表清除
+     */
     void clearBlock(OutputStream outs) throws IOException {
         clearHashTable(hashSize);
         freeCode = clearCode + 2;
@@ -87,9 +109,11 @@ public class LZWEncoder {
         outputCode(clearCode, outs);
     }
 
-    // 重置编码表
-    void clearHashTable(int hsize) {
-        for (int i = 0; i < hsize; ++i) {
+    /**
+     * 重置编码表
+     */
+    void clearHashTable(int hSize) {
+        for (int i = 0; i < hSize; ++i) {
             hashTable[i] = -1;
         }
     }
@@ -135,14 +159,17 @@ public class LZWEncoder {
         outer_loop:
         while ((pixel = getNextPixel()) != EOF) {
             currentCode = (pixel << maxBits) + currentEntry;
-            i = (pixel << hashShift) ^ currentEntry; // 异或哈希
+            i = (pixel << hashShift) ^ currentEntry;
+            // 异或哈希
 
             if (hashTable[i] == currentCode) {
                 currentEntry = codeTable[i];
                 continue;
-            } else if (hashTable[i] >= 0) // 非空槽
+            } else if (hashTable[i] >= 0)
+            // 非空槽
             {
-                displacement = hashSizeReg - i; // 二次哈希（G.Knott之后）
+                displacement = hashSizeReg - i;
+                // 二次哈希
                 if (i == 0) {
                     displacement = 1;
                 }
@@ -160,7 +187,8 @@ public class LZWEncoder {
             outputCode(currentEntry, outs);
             currentEntry = pixel;
             if (freeCode < maxMaxCode) {
-                codeTable[i] = freeCode++; // 编码 -> 哈希表
+                codeTable[i] = freeCode++;
+                // 编码 -> 哈希表
                 hashTable[i] = currentCode;
             } else {
                 clearBlock(outs);
@@ -172,17 +200,23 @@ public class LZWEncoder {
     }
 
     void encode(OutputStream os) throws IOException {
-        os.write(initCodeSize); // 写入 "初始编码大小" 字节
+        os.write(initCodeSize);
+        // 写入 "初始编码大小" 字节
 
-        remainingPixels = imageWidth * imageHeight; // 重置导航变量
+        remainingPixels = imageWidth * imageHeight;
+        // 重置导航变量
         currentPixel = 0;
 
-        compress(initCodeSize + 1, os); // 压缩并写入像素数据
+        compress(initCodeSize + 1, os);
+        // 压缩并写入像素数据
 
-        os.write(0); // 写入块终结符
+        os.write(0);
+        // 写入块终结符
     }
 
-    // 刷新数据包到磁盘，并重置累加器
+    /**
+     * 刷新数据包到磁盘，并重置累加器
+     */
     void flushAccumulator(OutputStream outs) throws IOException {
         if (accumulatorCount > 0) {
             outs.write(accumulatorCount);

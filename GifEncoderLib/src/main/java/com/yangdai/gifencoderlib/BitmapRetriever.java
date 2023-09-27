@@ -24,7 +24,7 @@ public class BitmapRetriever {
     private int height = 0;
     private int start = 0;
     private int end = 0;
-    private int fps = 5;    // 帧数
+    private int fps = 5;
 
     public BitmapRetriever() {
         bitmaps = new ArrayList<>();
@@ -48,7 +48,7 @@ public class BitmapRetriever {
           (视频质量不高或其他原因 可能出现总是获取为同一帧画面,
           也就是 假设获取50帧画面,实际只有10帧有效,其余有重复画面)
          */
-            Bitmap frame = retriever.getFrameAtTime((long) i, MediaMetadataRetriever.OPTION_CLOSEST);
+            Bitmap frame = retriever.getFrameAtTime(i, MediaMetadataRetriever.OPTION_CLOSEST);
             if (frame != null) {
                 try {
                     bitmaps.add(scale(frame));
@@ -72,19 +72,25 @@ public class BitmapRetriever {
         return value != null ? Long.parseLong(value) : 0;
     }
 
-    // 设置分辨率大小
+    /**
+     * 设置分辨率大小
+     */
     public void setSize(int width, int height) {
         this.width = width;
         this.height = height;
     }
 
-    // 截取视频的起始时间(单位 s)
+    /**
+     * 截取视频的起始时间(单位 s)
+     */
     public void setDuration(int begin, int end) {
         this.start = begin;
         this.end = end;
     }
 
-    // 设置帧率
+    /**
+     * 设置帧率
+     */
     public void setFPS(int fps) {
         this.fps = fps;
     }

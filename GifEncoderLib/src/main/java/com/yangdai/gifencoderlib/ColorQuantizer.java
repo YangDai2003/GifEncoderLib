@@ -4,77 +4,120 @@ package com.yangdai.gifencoderlib;
  * @author 30415
  */
 public class ColorQuantizer {
-    /* 使用的颜色数量 */
+    /**
+     * 使用的颜色数量
+     */
     protected static final int COLOR_COUNT = 256;
 
-    /* 四个接近500的质数 - 假设没有图像的长度太大 */
+    /**
+     * 四个接近500的质数 - 假设没有图像的长度太大
+     */
     protected static final int PRIME_1 = 499;
     protected static final int PRIME_2 = 491;
     protected static final int PRIME_3 = 487;
     protected static final int PRIME_4 = 503;
 
-    /* 输入图像的最小大小 */
+    /**
+     * 输入图像的最小大小
+     */
     protected static final int MIN_PICTURE_BYTES = (3 * PRIME_4);
 
     protected static final int MAX_NET_POS = (COLOR_COUNT - 1);
-    /* 颜色值的偏移量 */
+    /**
+     * 颜色值的偏移量
+     */
     protected static final int NET_BIAS_SHIFT = 4;
-    /* 学习周期数 */
+    /**
+     * 学习周期数
+     */
     protected static final int NUM_CYCLES = 100;
 
-    /* 频率和偏差的定义 */
-    /* 分数的偏差 */
+    /**
+     * 频率和偏差的定义
+     */
     protected static final int INT_BIAS_SHIFT = 16;
     protected static final int INT_BIAS = (1 << INT_BIAS_SHIFT);
-    /* gamma = 1024 */
+    /**
+     * gamma = 1024
+     */
     protected static final int GAMMA_SHIFT = 10;
     protected static final int GAMMA = (1 << GAMMA_SHIFT);
     protected static final int BETA_SHIFT = 10;
-    /* beta = 1/1024 */
+    /**
+     * beta = 1/1024
+     */
     protected static final int BETA = (INT_BIAS >> BETA_SHIFT);
     protected static final int BETA_GAMMA = (INT_BIAS << (GAMMA_SHIFT - BETA_SHIFT));
 
-    /* 减小半径因子的定义 */
-    /* 对于256个颜色，半径开始 */
+    /**
+     * 减小半径因子的定义
+     * 对于256个颜色，半径开始
+     */
     protected static final int INIT_RADIUS = (COLOR_COUNT >> 3);
-    /* 在32.0处偏差6位 */
+    /**
+     * 在32.0处偏差6位
+     */
     protected static final int RADIUS_BIAS_SHIFT = 6;
     protected static final int RADIUS_BIAS = (1 << RADIUS_BIAS_SHIFT);
-    /* 并且每个周期减小1/30的因子 */
+    /**
+     * 并且每个周期减小1/30的因子
+     */
     protected static final int INIT_RADIUS_VALUE = (INIT_RADIUS * RADIUS_BIAS);
     protected static final int RADIUS_DEC = 30;
 
-    /* 减小alpha因子的定义 */
-    /* alpha从1.0开始 */
+    /**
+     * 减小alpha因子的定义
+     * alpha从1.0开始
+     */
     protected static final int ALPHA_BIAS_SHIFT = 10;
     protected static final int INITIAL_ALPHA = (1 << ALPHA_BIAS_SHIFT);
-    /* 偏差10位 */
+    /**
+     * 偏差10位
+     */
     protected int alphaDec;
 
-    /* RAD_BIAS 和 ALPHA_RAD_BIAS 用于计算 radPower */
+    /**
+     * RAD_BIAS 和 ALPHA_RAD_BIAS 用于计算 radPower
+     */
     protected static final int RAD_BIAS_SHIFT = 8;
     protected static final int RAD_BIAS = (1 << RAD_BIAS_SHIFT);
     protected static final int ALPHA_RAD_BIAS_SHIFT = (ALPHA_BIAS_SHIFT + RAD_BIAS_SHIFT);
     protected static final int ALPHA_RAD_BIAS = (1 << ALPHA_RAD_BIAS_SHIFT);
-    /* 输入图像本身 */
+    /**
+     * 输入图像本身
+     */
     protected byte[] inputImage;
-    /* = H*W*3 */
+    /**
+     * = H*W*3
+     */
     protected int pixelCount;
-    /* 采样因子 1..30 */
+    /**
+     * 采样因子 1..30
+     */
     protected int sampleFactor;
 
-    /* BGRc */
+    /**
+     * BGRc
+     */
     protected int[][] network;
-    /* 用于网络查找 - 实际上是256个 */
+    /**
+     * 用于网络查找 - 实际上是256个
+     */
     protected int[] networkIndex = new int[256];
     protected int[] bias = new int[COLOR_COUNT];
-    /* 用于学习的偏差和频率数组 */
+    /**
+     * 用于学习的偏差和频率数组
+     */
     protected int[] frequency = new int[COLOR_COUNT];
+    /**
+     * 预计算的 radPower
+     */
     protected int[] radPower = new int[INIT_RADIUS];
-    /* 预计算的 radPower */
 
-    /* 初始化网络范围为(0,0,0)到(255,255,255)并设置参数
-       ----------------------------------------------------------------------- */
+
+    /**
+     * 初始化网络范围为(0,0,0)到(255,255,255)并设置参数
+     */
     public ColorQuantizer(byte[] input, int length, int sample) {
 
         int i;
@@ -110,8 +153,9 @@ public class ColorQuantizer {
         return map;
     }
 
-    /* 对网络进行插入排序，并构建 netIndex[0..255]（在去偏后进行）
-        ------------------------------------------------------------------------------- */
+    /**
+     * 对网络进行插入排序，并构建 netIndex[0..255]（在去偏后进行）
+     */
     public void buildIndex() {
 
         int i, j, smallPos, smallVal;
@@ -131,7 +175,8 @@ public class ColorQuantizer {
                 q = network[j];
                 if (q[1] < smallVal) {
                     smallPos = j;
-                    smallVal = q[1]; /* g上的索引 */
+                    smallVal = q[1];
+                    /* g上的索引 */
                 }
             }
             q = network[smallPos];
@@ -166,8 +211,9 @@ public class ColorQuantizer {
         }
     }
 
-    /* 主要学习循环
-       ------------------ */
+    /**
+     * 主要学习循环
+     */
     public void learn() {
 
         int i, j, b, g, r;
@@ -245,18 +291,22 @@ public class ColorQuantizer {
         }
     }
 
-    /* 搜索 BGR 值为 0..255（去偏后）并返回颜色索引
-        ---------------------------------------------------------------------------- */
+    /**
+     * 搜索 BGR 值为 0..255（去偏后）并返回颜色索引
+     */
     public int map(int b, int g, int r) {
 
         int i, j, dist, a, bestD;
         int[] p;
         int best;
 
-        bestD = 1000; /* 最大距离为 256*3 */
+        bestD = 1000;
+        /* 最大距离为 256*3 */
         best = -1;
-        i = networkIndex[g]; /* g 上的索引 */
-        j = i - 1; /* 从 netIndex[g] 开始向外查找 */
+        i = networkIndex[g];
+        /* g 上的索引 */
+        j = i - 1;
+        /* 从 netIndex[g] 开始向外查找 */
 
         while ((i < COLOR_COUNT) || (j >= 0)) {
             if (i < COLOR_COUNT) {
@@ -290,9 +340,11 @@ public class ColorQuantizer {
             }
             if (j >= 0) {
                 p = network[j];
-                dist = g - p[1]; /* 在 g 上的索引 - 反向差异 */
+                dist = g - p[1];
+                /* 在 g 上的索引 - 反向差异 */
                 if (dist >= bestD) {
-                    j = -1; /* 停止迭代 */
+                    j = -1;
+                    /* 停止迭代 */
                 } else {
                     j--;
                     if (dist < 0) {
@@ -327,10 +379,10 @@ public class ColorQuantizer {
         return getColorMap();
     }
 
-    /* 去偏网络，将值调整为0..255，并记录位置i以准备排序
-    ----------------------------------------------------------------------------------- */
+    /**
+     * 去偏网络，将值调整为0..255，并记录位置i以准备排序
+     */
     public void unBiasNet() {
-
         @SuppressWarnings("unused")
         int i, j;
 
@@ -338,12 +390,13 @@ public class ColorQuantizer {
             network[i][0] >>= NET_BIAS_SHIFT;
             network[i][1] >>= NET_BIAS_SHIFT;
             network[i][2] >>= NET_BIAS_SHIFT;
-            network[i][3] = i; /* record colour no */
+            network[i][3] = i;
         }
     }
 
-    /* 通过预计算的 alpha*(1-((i-j)^2/[r]^2)) 在 radPower[|i-j|] 中移动相邻的神经元
-       --------------------------------------------------------------------------------- */
+    /**
+     * 通过预计算的 alpha*(1-((i-j)^2/[r]^2)) 在 radPower[|i-j|] 中移动相邻的神经元
+     */
     protected void moveAdjacentNeurons(int rad, int i, int b, int g, int r) {
 
         int j, k, lo, hi, a, m;
@@ -384,8 +437,9 @@ public class ColorQuantizer {
         }
     }
 
-    /* 将神经元i朝着有偏差的(b,g,r)因子alpha移动
-    ---------------------------------------------------- */
+    /**
+     * 将神经元i朝着有偏差的(b,g,r)因子alpha移动
+     */
     protected void moveSingleNeuron(int alpha, int i, int b, int g, int r) {
 
         /* alter hit neuron */
@@ -395,7 +449,9 @@ public class ColorQuantizer {
         n[2] -= (alpha * (n[2] - r)) / INITIAL_ALPHA;
     }
 
-    /* 搜索有偏差的BGR值 ---------------------------- */
+    /**
+     * 搜索有偏差的BGR值
+     */
     protected int findBiasedColor(int b, int g, int r) {
 
         /* 找到最接近的神经元（最小距离）并更新频率 */
