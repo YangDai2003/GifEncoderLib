@@ -80,6 +80,14 @@ public class BitmapRetriever {
         this.height = height;
     }
 
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
     /**
      * 截取视频的起始时间(单位 s)
      */
@@ -115,7 +123,7 @@ public class BitmapRetriever {
             }
             try {
                 FileOutputStream out = new FileOutputStream(f);
-                bm.compress(Bitmap.CompressFormat.PNG, 90, out);
+                bm.compress(Bitmap.CompressFormat.PNG, 100, out);
                 out.flush();
                 out.close();
             } catch (Exception e) {
