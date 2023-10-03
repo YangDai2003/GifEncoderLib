@@ -24,18 +24,18 @@ public class MainActivity extends AppCompatActivity {
     private void convertVideoToGif(String inputVideoPath, String outputGifPath) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
-            BitmapRetriever extractor = new BitmapRetriever(inputVideoPath);
-            extractor.setFps(10);
-            extractor.setOutputBitmapSize(extractor.getVideoWidth() / 2, extractor.getVideoHeight() / 2);
-            List<Bitmap> bitmaps = extractor.generateBitmaps();
-
-            GifEncoder encoder = new GifEncoder();
-            encoder.init(bitmaps.get(0));
-            encoder.start(outputGifPath);
-            for (int i = 1; i < bitmaps.size(); i++) {
-                encoder.addFrame(bitmaps.get(i));
+            try (BitmapRetriever extractor = new BitmapRetriever(inputVideoPath)) {
+                extractor.setFps(10);
+                extractor.setOutputBitmapSize(extractor.getVideoWidth() / 2, extractor.getVideoHeight() / 2);
+                List<Bitmap> bitmaps = extractor.generateBitmaps();
+                GifEncoder encoder = new GifEncoder();
+                encoder.init(bitmaps.get(0));
+                encoder.start(outputGifPath);
+                for (int i = 1; i < bitmaps.size(); i++) {
+                    encoder.addFrame(bitmaps.get(i));
+                }
+                encoder.finish();
             }
-            encoder.finish();
             runOnUiThread(() -> Toast.makeText(this, "finish", Toast.LENGTH_SHORT).show());
         });
     }

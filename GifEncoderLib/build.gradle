@@ -10,10 +10,9 @@ android {
     defaultConfig {
         minSdk 26
 
-        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
-        versionCode 103
-        versionName '1.0.3'
+        versionCode 105
+        versionName '1.0.5'
     }
 
     buildTypes {
@@ -42,7 +41,7 @@ afterEvaluate {
                 // You can then customize attributes of the publication as shown below.
                 groupId = 'com.github.YangDai2003'
                 artifactId = 'GifEncoder'
-                version = '1.0.3'
+                version = '1.0.5'
             }
         }
     }
